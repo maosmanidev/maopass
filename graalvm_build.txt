@@ -1,0 +1,2 @@
+native-image -jar MaoPass-1.0.jar MaoPass-1.0
+

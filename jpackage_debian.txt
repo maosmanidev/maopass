@@ -1,0 +1,7 @@
+First of all build with mvn
+run the command
+mvn install 
+then
+
+jpackage --type deb --input . --dest . --main-jar ./MaoPass-1.0.jar --main-class Main --module-path "/home/maosmani/Lib/javafx-jmods-17.0.10" --add-modules javafx.controls,javafx.fxml --name MaoPass  --linux-shortcut --install-dir /opt --linux-menu-group Utility  --icon ./logo.png --name "MaoPass"
+ 
