@@ -35,6 +35,12 @@ jobs:
       run: mvn install
     - name: stagin
       run: mkdir staging && cp target/*.jar staging
+    - name: packaging
+      uses: actions/upload-artifact@v4
+      with:
+        name: Package
+        path: staging
+
     
   
 
