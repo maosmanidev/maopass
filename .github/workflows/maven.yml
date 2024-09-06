@@ -33,8 +33,11 @@ jobs:
       run: mvn clean
     - name: Build with Mvn
       run: mvn install
+    # packaging
+    - name: packaging for deb
+      run: jpackage --type deb --input . --dest . --main-jar ./MaoPass-1.0.jar --main-class Main --module-path "lib/" --add-modules javafx.controls,javafx.fxml --name MaoPass  --linux-shortcut --install-dir /opt --linux-menu-group Utility  --icon ./logo.png --name "MaoPass"
     - name: stagin
-      run: mkdir staging && cp target/*.jar staging
+      run: mkdir staging && cp target/*.deb staging
     - name: packaging
       uses: actions/upload-artifact@v4
       with:
