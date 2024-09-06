@@ -24,20 +24,29 @@ jobs:
       uses: actions/setup-java@v4
       with:
         java-version: '21'
-        distribution: 'temurin'
+        javafx: true
+        distribution: 'oracle'
         architecture: x64
         cache: maven
     - name: Build with Maven
       run: mvn -B package --file pom.xml
     - name: Clean With maven
       run: mvn clean
+    - name: Start Xvfb
+      run: |
+          sudo apt-get install xvfb
+          Xvfb :99 & export DISPLAY=:99
+    - name: Install dependencies and run tests -Djavafx.platform=gtk -Dtestfx.robot=glass
+      run: mvn clean test
     - name: Build with Mvn
       run: mvn install
     # packaging
+    - name: copy logo
+      run: cp logo.png target/
     - name: copy libs
       run: cp -r lib/  target/
     - name: packaging for debs
-      run: cd target/ && jpackage --type deb --input . --dest . --main-jar ./MaoPass-1.0.jar --main-class Main --module-path "lib/" --add-modules javafx.controls,javafx.fxml --name MaoPass  --linux-shortcut --install-dir /opt --linux-menu-group Utility  --name "MaoPass"
+      run: cd target/ && jpackage --type deb --input . --dest . --main-jar ./MaoPass-1.0.jar --main-class Main --module-path "lib/" --add-modules javafx.controls,javafx.fxml --name MaoPass  --linux-shortcut --install-dir /opt --linux-menu-group Utility  --icon ./logo.png --name "MaoPass"
     - name: stagin
       run: mkdir staging && cp target/*.deb staging
     - name: packaging
