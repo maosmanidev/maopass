@@ -33,6 +33,9 @@ jobs:
       run: mvn clean
     - name: Build with Mvn
       run: mvn install
+    - name: stagin
+      run: mkdir staging && cp target/*.jar staging
+    
   
 
  
