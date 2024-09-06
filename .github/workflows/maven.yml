@@ -35,7 +35,7 @@ jobs:
       run: mvn install
     # packaging
     - name: packaging for deb
-      run: cd target/ && jpackage --type deb --input . --dest . --main-jar ./MaoPass-1.0.jar --main-class Main --module-path "lib/" --add-modules javafx.controls,javafx.fxml --name MaoPass  --linux-shortcut --install-dir /opt --linux-menu-group Utility  --icon ./logo.png --name "MaoPass"
+      run: cd target/ && jpackage --type deb --input . --dest . --main-jar ./MaoPass-1.0.jar --main-class Main --module-path "lib/" --add-modules javafx.controls,javafx.fxml --name MaoPass  --linux-shortcut --install-dir /opt --linux-menu-group Utility  --name "MaoPass"
     - name: stagin
       run: mkdir staging && cp target/*.deb staging
     - name: packaging
