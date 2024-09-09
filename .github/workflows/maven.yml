@@ -30,7 +30,8 @@ jobs:
       run: |
         wget https://gluonhq.com/download/javafx-sdk-21.0.0-linux.zip
         unzip javafx-sdk-21.0.0-linux.zip -d javafx-sdk
-        sudo apt-get install -y openjdk-21-jdk  # Ensure Java 21 is installed
+        sudo apt-get update
+        sudo apt-get install -y openjdk-21-jdk
 
     - name: Install JavaFX JMods
       run: |
@@ -57,12 +58,12 @@ jobs:
 
     - name: Test the packaged application
       run: |
-        exePath="${{ github.workspace }}/target/package/${appName}.deb"
-        if [ -f "$exePath" ]; then
-          echo "Debian package created successfully at $exePath"
-          # Add your package testing commands here
+        packagePath="${{ github.workspace }}/target/package/${appName}.deb"
+        if [ -f "$packagePath" ]; then
+          echo "Debian package created successfully at $packagePath"
+          # You can also install and test the package here if needed
         else
-          echo "Package not found at path: $exePath"
+          echo "Package not found at path: $packagePath"
           exit 1
         }
 
