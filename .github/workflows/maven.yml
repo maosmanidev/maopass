@@ -1,61 +1,73 @@
-# This workflow will build a Java project with Maven, and cache/restore any dependencies to improve the workflow execution time
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-maven
-
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-
-name: Build The Application
+name: Package JavaFX Application
 
 on:
   push:
-    branches: [ "main" ]
-
+    branches:
+      - main
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v3
+
     - name: Set up JDK 21
-      uses: actions/setup-java@v4
+      uses: actions/setup-java@v3
       with:
         java-version: '21'
-        javafx: true
-        distribution: 'oracle'
-        architecture: x64
-        cache: maven
-    - name: Build with Maven
-      run: mvn -B package --file pom.xml
-    - name: Clean With maven
-      run: mvn clean
-    - name: Start Xvfb
-      run: |
-          sudo apt-get install xvfb
-          Xvfb :99 & export DISPLAY=:99
-    - name: Install dependencies and run tests -Djavafx.platform=gtk -Dtestfx.robot=glass
-      run: mvn clean test
-    - name: Build with Mvn
-      run: mvn install
-    # packaging
-    - name: copy logo
-      run: cp logo.png target/
-    - name: copy libs
-      run: cp -r lib/  target/
-    - name: packaging for debs
-      run: cd target/ && jpackage --type deb --input . --dest . --main-jar ./MaoPass-1.0.jar --main-class Main --module-path "lib/" --add-modules javafx.controls,javafx.fxml --name MaoPass  --linux-shortcut --install-dir /opt --linux-menu-group Utility  --icon ./logo.png --name "MaoPass"
-    - name: stagin
-      run: mkdir staging && cp target/*.deb staging
-    - name: packaging
-      uses: actions/upload-artifact@v4
+        distribution: 'temurin'
+
+    - name: Set up Maven
+      uses: actions/setup-java@v3
       with:
-        name: Package
-        path: staging
+        java-version: '21'
+        distribution: 'temurin'
+        maven-version: 'latest'  # Use the latest Maven version
 
-    
-  
+    - name: Install JavaFX SDK
+      run: |
+        wget https://gluonhq.com/download/javafx-sdk-21.0.0-linux.zip
+        unzip javafx-sdk-21.0.0-linux.zip -d javafx-sdk
+        sudo apt-get install -y openjdk-21-jdk  # Ensure Java 21 is installed
 
- 
+    - name: Install JavaFX JMods
+      run: |
+        wget https://gluonhq.com/download/javafx-jmods-21.0.0.zip
+        unzip javafx-jmods-21.0.0.zip -d javafx-jmods
+
+    - name: Build and package application
+      run: |
+        mvn clean package
+
+    - name: Package with jpackage
+      run: |
+        appName="YourAppName"
+        version="1.0"
+        inputDir="target"  # Directory containing the JAR file
+        jarFile="MaoPass-1.0.jar"  # Adjust to your app's JAR file name
+        outputDir="target/package"
+        jmodsDir="${{ github.workspace }}/javafx-jmods/jmods"
+        sdkDir="${{ github.workspace }}/javafx-sdk/lib"
+
+        mkdir -p $outputDir
+        
+        jpackage --input $inputDir --name $appName --version $version --main-jar $jarFile --type deb --dest $outputDir --add-modules javafx.controls,javafx.fxml --module-path $jmodsDir --runtime-image $sdkDir
+
+    - name: Test the packaged application
+      run: |
+        exePath="${{ github.workspace }}/target/package/${appName}.deb"
+        if [ -f "$exePath" ]; then
+          echo "Debian package created successfully at $exePath"
+          # Add your package testing commands here
+        else
+          echo "Package not found at path: $exePath"
+          exit 1
+        }
+
+    - name: Upload test results
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-output
+        path: ${{ github.workspace }}/target/package
