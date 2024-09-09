@@ -20,10 +20,8 @@ jobs:
         distribution: 'temurin'
 
     - name: Set up Maven
-      uses: actions/setup-java@v3
+      uses: actions/setup-maven@v3
       with:
-        java-version: '21'
-        distribution: 'temurin'
         maven-version: 'latest'  # Use the latest Maven version
 
     - name: Install JavaFX SDK
@@ -55,20 +53,18 @@ jobs:
       run: |
         appName="maopass"
         version="1.0"
-        jarFile="./MaoPass-1.0.jar"  # Adjust to your app's JAR file name
+        jarFile="./target/MaoPass-1.0.jar"  # Adjust to your app's JAR file name
         jmodsDir="${{ github.workspace }}/javafx-jmods/jmods"
-        sdkDir="${{ github.workspace }}/javafx-sdk/lib"   
-        cd target/
-        jpackage --input . --name $appName --version $version --main-jar $jarFile --type deb --dest . --main-class Main  --add-modules javafx.controls,javafx.fxml --module-path $jmodsDir --runtime-image $sdkDir
-       
-    - name: stagin
-      run: mkdir staging && cp ./*.deb staging
-    - name: packaging
+        sdkDir="${{ github.workspace }}/javafx-sdk/lib"
+        jpackage --input target --name $appName --version $version --main-jar $jarFile --type deb --dest . --main-class Main --add-modules javafx.controls,javafx.fxml --module-path $jmodsDir --runtime-image $sdkDir
+
+    - name: Staging
+      run: |
+        mkdir -p staging
+        cp *.deb staging/
+
+    - name: Upload Package
       uses: actions/upload-artifact@v4
       with:
         name: Package
-        path: staging
-
-
-        
-
+        path: staging/
