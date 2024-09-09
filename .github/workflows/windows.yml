@@ -1,0 +1,49 @@
+name: Package JavaFX Application
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up JDK 21
+      uses: actions/setup-java@v3
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+
+    - name: Set up Maven
+      uses: actions/setup-java@v3
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+        maven-version: 'latest'  # Use the latest Maven version
+
+    - name: Install JavaFX SDK
+      run: |
+        choco install openjdk21
+        choco install javafx-sdk --version 21
+
+    - name: Build and package application
+      run: |
+        mvn clean package
+
+    - name: Package with jpackage
+      run: |
+        $env:JAVA_HOME = "C:\Program Files\AdoptOpenJDK\jdk-21"
+        $env:PATH += ";$env:JAVA_HOME\bin"
+        $appName = "MaoPass"
+        $version = "1.0"
+        $inputDir = "target\MaoPass-1.0.jar"  # Adjust to your app's jar location
+        $outputDir = "output\"
+        
+        mkdir $outputDir
+        
+        jpackage --input $inputDir --name $appName --version $version --main-jar MaoPass-1.0.jar --type exe --dest $outputDir
