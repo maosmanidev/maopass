@@ -62,7 +62,7 @@ jobs:
         jpackage --input . --name $appName --version $version --main-jar $jarFile --type deb --dest . --main-class Main  --add-modules javafx.controls,javafx.fxml --module-path $jmodsDir --runtime-image $sdkDir
        
     - name: stagin
-      run: mkdir staging && cp target/*.deb staging
+      run: mkdir staging && cp ./*.deb staging
     - name: packaging
       uses: actions/upload-artifact@v4
       with:
