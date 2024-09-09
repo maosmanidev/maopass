@@ -26,11 +26,15 @@ jobs:
         distribution: 'temurin'
         maven-version: 'latest'  # Use the latest Maven version
 
-    - name: Install JavaFX SDK
+    - name: Download JavaFX SDK
       run: |
         Invoke-WebRequest -Uri "https://gluonhq.com/download/javafx-sdk-21.0.0.zip" -OutFile "javafx-sdk.zip"
         Expand-Archive -Path "javafx-sdk.zip" -DestinationPath "javafx-sdk"
-        $env:PATH += ";${{ github.workspace }}\javafx-sdk\bin"
+
+    - name: Download JavaFX JMods
+      run: |
+        Invoke-WebRequest -Uri "https://gluonhq.com/download/javafx-jmods-21.0.0.zip" -OutFile "javafx-jmods.zip"
+        Expand-Archive -Path "javafx-jmods.zip" -DestinationPath "javafx-jmods"
 
     - name: Build and package application
       run: |
@@ -42,9 +46,27 @@ jobs:
         $env:PATH += ";$env:JAVA_HOME\bin"
         $appName = "YourAppName"
         $version = "1.0"
-        $inputDir = "target\your-app-jar"  # Adjust to your app's jar location
+        $inputDir = "target\MaoPass-1.0.jar"  # Adjust to your app's jar location
         $outputDir = "target\package"
-        
+        $jmodsDir = "${{ github.workspace }}\javafx-jmods\jmods"
+        $sdkDir = "${{ github.workspace }}\javafx-sdk\lib"
+
         mkdir $outputDir
         
-        jpackage --input $inputDir --name $appName --version $version --main-jar your-app.jar --type exe --dest $outputDir
+        jpackage --input $inputDir --name $appName --version $version --main-jar your-app.jar --type exe --dest $outputDir --add-modules javafx.controls,javafx.fxml --module-path $jmodsDir --runtime-image $sdkDir
+
+    - name: Test the packaged application
+      run: |
+        $exePath = "${{ github.workspace }}\target\package\$appName.exe"
+        if (Test-Path $exePath) {
+          & $exePath --help | Out-File -FilePath "${{ github.workspace }}\test_output.txt"
+          Write-Output "Application executable ran successfully. Check test_output.txt for details."
+        } else {
+          Write-Error "Executable not found at path: $exePath"
+        }
+
+    - name: Upload test results
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-output
+        path: ${{ github.workspace }}\test_output.txt
