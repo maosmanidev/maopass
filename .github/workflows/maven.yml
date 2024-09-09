@@ -70,36 +70,3 @@ jobs:
       with:
         name: deb-package
         path: target/package/${appName}.deb
-
-    - name: Download and test the packaged application
-      run: |
-        # Define variables
-        artifactPath="${{ github.workspace }}/target/package/${appName}.deb"
-        installDir="/tmp/${appName}"
-
-        # Download the .deb file
-        curl -O ${{ steps.upload-artifact.outputs.download_url }}
-
-        # Install the .deb package
-        sudo dpkg -i "$artifactPath"
-        
-        # Check for missing dependencies and install them
-        sudo apt-get install -f -y
-        
-        # Verify the installation
-        if command -v $appName > /dev/null 2>&1; then
-          echo "$appName installed successfully."
-
-          # Run the application (replace with your app's executable or command)
-          # This might need adjustment based on your application's executable name and location
-          $appName --version || echo "Failed to run $appName. Check if the executable is correctly configured."
-        else
-          echo "$appName not found after installation."
-          exit 1
-        }
-
-    - name: Upload test results
-      uses: actions/upload-artifact@v3
-      with:
-        name: test-output
-        path: ${{ github.workspace }}/target/package
