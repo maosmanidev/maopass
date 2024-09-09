@@ -32,7 +32,6 @@ jobs:
         JAVA_FX_VERSION="21.0.4"  # Update this to the latest version
         JAVA_FX_SDK_URL="https://download2.gluonhq.com/openjfx/21.0.4/openjfx-21.0.4_linux-x64_bin-sdk.zip"
         
-        
         # Download and unzip JavaFX SDK
         wget $JAVA_FX_SDK_URL -O javafx-sdk.zip
         unzip javafx-sdk.zip -d javafx-sdk
@@ -66,14 +65,36 @@ jobs:
         
         jpackage --input $inputDir --name $appName --version $version --main-jar $jarFile --type deb --dest $outputDir --add-modules javafx.controls,javafx.fxml --module-path $jmodsDir --runtime-image $sdkDir
 
-    - name: Test the packaged application
+    - name: Upload .deb file
+      uses: actions/upload-artifact@v3
+      with:
+        name: deb-package
+        path: target/package/${appName}.deb
+
+    - name: Download and test the packaged application
       run: |
-        packagePath="${{ github.workspace }}/target/package/${appName}.deb"
-        if [ -f "$packagePath" ]; then
-          echo "Debian package created successfully at $packagePath"
-          # You can also install and test the package here if needed
+        # Define variables
+        artifactPath="${{ github.workspace }}/target/package/${appName}.deb"
+        installDir="/tmp/${appName}"
+
+        # Download the .deb file
+        curl -O ${{ steps.upload-artifact.outputs.download_url }}
+
+        # Install the .deb package
+        sudo dpkg -i "$artifactPath"
+        
+        # Check for missing dependencies and install them
+        sudo apt-get install -f -y
+        
+        # Verify the installation
+        if command -v $appName > /dev/null 2>&1; then
+          echo "$appName installed successfully."
+
+          # Run the application (replace with your app's executable or command)
+          # This might need adjustment based on your application's executable name and location
+          $appName --version || echo "Failed to run $appName. Check if the executable is correctly configured."
         else
-          echo "Package not found at path: $packagePath"
+          echo "$appName not found after installation."
           exit 1
         }
 
