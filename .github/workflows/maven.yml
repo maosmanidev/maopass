@@ -28,15 +28,25 @@ jobs:
 
     - name: Install JavaFX SDK
       run: |
-        wget https://gluonhq.com/download/javafx-sdk-21.0.0-linux.zip
-        unzip javafx-sdk-21.0.0-linux.zip -d javafx-sdk
+        # Define variables for the latest version
+        JAVA_FX_VERSION="21.0.4"  # Update this to the latest version
+        JAVA_FX_SDK_URL="https://download2.gluonhq.com/openjfx/21.0.4/openjfx-21.0.4_linux-x64_bin-sdk.zip"
+        
+        
+        # Download and unzip JavaFX SDK
+        wget $JAVA_FX_SDK_URL -O javafx-sdk.zip
+        unzip javafx-sdk.zip -d javafx-sdk
         sudo apt-get update
         sudo apt-get install -y openjdk-21-jdk
 
     - name: Install JavaFX JMods
       run: |
-        wget https://gluonhq.com/download/javafx-jmods-21.0.0.zip
-        unzip javafx-jmods-21.0.0.zip -d javafx-jmods
+        # Define variables for the latest version
+        JAVA_FX_JMODS_URL="https://download2.gluonhq.com/openjfx/21.0.4/openjfx-21.0.4_linux-x64_bin-jmods.zip"
+        
+        # Download and unzip JavaFX JMods
+        wget $JAVA_FX_JMODS_URL -O javafx-jmods.zip
+        unzip javafx-jmods.zip -d javafx-jmods
 
     - name: Build and package application
       run: |
@@ -44,7 +54,7 @@ jobs:
 
     - name: Package with jpackage
       run: |
-        appName="YourAppName"
+        appName="maopass"
         version="1.0"
         inputDir="target"  # Directory containing the JAR file
         jarFile="MaoPass-1.0.jar"  # Adjust to your app's JAR file name
