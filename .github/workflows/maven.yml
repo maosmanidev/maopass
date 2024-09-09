@@ -60,13 +60,18 @@ jobs:
         outputDir="target/package"
         jmodsDir="${{ github.workspace }}/javafx-jmods/jmods"
         sdkDir="${{ github.workspace }}/javafx-sdk/lib"
+        outputFolder="${{ github.workspace }}/output"
 
         mkdir -p $outputDir
+        mkdir -p $outputFolder
         
         jpackage --input $inputDir --name $appName --version $version --main-jar $jarFile --type deb --dest $outputDir --add-modules javafx.controls,javafx.fxml --module-path $jmodsDir --runtime-image $sdkDir
+        
+        # Copy the .deb file to the output folder
+        cp $outputDir/${appName}.deb $outputFolder/
 
-    - name: Upload .deb file
+    - name: Upload output folder
       uses: actions/upload-artifact@v3
       with:
         name: deb-package
-        path: target/package/${appName}.deb
+        path: output
