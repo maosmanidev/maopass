@@ -45,9 +45,7 @@ jobs:
     
     - name: Clean with Maven
       run: mvn clean
-    
-    - name: Install dependencies and run tests
-      run: mvn clean test -Djavafx.platform=win -Dtestfx.robot=glass
+  
     
     - name: Build with Maven
       run: mvn install
@@ -55,9 +53,7 @@ jobs:
     - name: Copy logo
       run: Copy-Item -Path logo.png -Destination target/
     
-    - name: Copy libs
-      run: Copy-Item -Path lib/* -Destination target/ -Recurse
-    
+  
     - name: Packaging for MSIs
       run: |
         cd target/
