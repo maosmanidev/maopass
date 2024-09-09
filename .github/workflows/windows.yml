@@ -28,8 +28,9 @@ jobs:
 
     - name: Install JavaFX SDK
       run: |
-        choco install openjdk21
-        choco install javafx-sdk --version 21
+        Invoke-WebRequest -Uri "https://gluonhq.com/download/javafx-sdk-21.0.0.zip" -OutFile "javafx-sdk.zip"
+        Expand-Archive -Path "javafx-sdk.zip" -DestinationPath "javafx-sdk"
+        $env:PATH += ";${{ github.workspace }}\javafx-sdk\bin"
 
     - name: Build and package application
       run: |
@@ -39,11 +40,11 @@ jobs:
       run: |
         $env:JAVA_HOME = "C:\Program Files\AdoptOpenJDK\jdk-21"
         $env:PATH += ";$env:JAVA_HOME\bin"
-        $appName = "MaoPass"
+        $appName = "YourAppName"
         $version = "1.0"
-        $inputDir = "target\MaoPass-1.0.jar"  # Adjust to your app's jar location
-        $outputDir = "output\"
+        $inputDir = "target\your-app-jar"  # Adjust to your app's jar location
+        $outputDir = "target\package"
         
         mkdir $outputDir
         
-        jpackage --input $inputDir --name $appName --version $version --main-jar MaoPass-1.0.jar --type exe --dest $outputDir
+        jpackage --input $inputDir --name $appName --version $version --main-jar your-app.jar --type exe --dest $outputDir
