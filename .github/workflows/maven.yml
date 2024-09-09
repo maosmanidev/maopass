@@ -57,7 +57,7 @@ jobs:
         version="1.0"
         inputDir="target"  # Directory containing the JAR file
         jarFile="MaoPass-1.0.jar"  # Adjust to your app's JAR file name
-        outputDir="target/package"
+        outputDir="target/"
         jmodsDir="${{ github.workspace }}/javafx-jmods/jmods"
         sdkDir="${{ github.workspace }}/javafx-sdk/lib"
         outputFolder="${{ github.workspace }}/output"
