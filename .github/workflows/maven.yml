@@ -55,23 +55,20 @@ jobs:
       run: |
         appName="maopass"
         version="1.0"
-        inputDir="target"  # Directory containing the JAR file
-        jarFile="MaoPass-1.0.jar"  # Adjust to your app's JAR file name
-        outputDir="target/"
+        jarFile="./MaoPass-1.0.jar"  # Adjust to your app's JAR file name
         jmodsDir="${{ github.workspace }}/javafx-jmods/jmods"
-        sdkDir="${{ github.workspace }}/javafx-sdk/lib"
-        outputFolder="${{ github.workspace }}/output"
-
-        mkdir -p $outputDir
-        mkdir -p $outputFolder
-        
-        jpackage --input $inputDir --name $appName --version $version --main-jar $jarFile --type deb --dest $outputDir --add-modules javafx.controls,javafx.fxml --module-path $jmodsDir --runtime-image $sdkDir
-        
-        # Copy the .deb file to the output folder
-        cp $outputDir/${appName}.deb $outputFolder/
-
-    - name: Upload output folder
-      uses: actions/upload-artifact@v3
+        sdkDir="${{ github.workspace }}/javafx-sdk/lib"   
+        cd target/
+        jpackage --input . --name $appName --version $version --main-jar $jarFile --type deb --dest . --main-class Main  --add-modules javafx.controls,javafx.fxml --module-path $jmodsDir --runtime-image $sdkDir
+       
+    - name: stagin
+      run: mkdir staging && cp target/*.deb staging
+    - name: packaging
+      uses: actions/upload-artifact@v4
       with:
-        name: deb-package
-        path: output
+        name: Package
+        path: staging
+
+
+        
+
