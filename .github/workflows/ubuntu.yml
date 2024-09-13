@@ -1,4 +1,4 @@
-name: Build The Application for Ubuntu
+name: Ubuntu
 
 on:
   push:
