@@ -1,0 +1,84 @@
+name: Build The Application
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    name: Build The Project
+
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        javafx: true
+        distribution: 'temurin'
+        architecture: x64
+        cache: maven
+    
+    - name: Install JavaFX SDK
+      run: |
+        # Define variables for the latest version
+        $JAVA_FX_VERSION = "21.0.4"  # Update this to the latest version
+        $JAVA_FX_SDK_URL = "https://download2.gluonhq.com/openjfx/21.0.4/openjfx-21.0.4_windows-x64_bin-sdk.zip"
+        
+        # Download and unzip JavaFX SDK
+        Invoke-WebRequest -Uri $JAVA_FX_SDK_URL -OutFile javafx-sdk.zip
+        Expand-Archive -Path javafx-sdk.zip -DestinationPath javafx-sdk
+
+    - name: Install JavaFX JMods
+      run: |
+        # Define variables for the latest version
+        $JAVA_FX_JMODS_URL = "https://download2.gluonhq.com/openjfx/21.0.4/openjfx-21.0.4_windows-x64_bin-jmods.zip"
+        
+        # Download and unzip JavaFX JMods
+        Invoke-WebRequest -Uri $JAVA_FX_JMODS_URL -OutFile javafx-jmods.zip
+        Expand-Archive -Path javafx-jmods.zip -DestinationPath javafx-jmods
+
+    - name: Build with Maven
+      run: mvn -B package --file pom.xml
+    
+    - name: Clean with Maven
+      run: mvn clean
+  
+    
+    - name: Build with Maven
+      run: mvn install
+    
+    - name: Copy logo
+      run: Copy-Item -Path ./logo.ico -Destination target/
+    
+  
+    - name: Packaging for MSIs
+      run: |
+        cd target/
+        jpackage --type msi --input . --dest . --main-jar ./MaoPass-1.0.jar --main-class Main --module-path "../javafx-jmods/javafx-jmods-21.0.4/"      --add-modules javafx.controls,javafx.fxml --name MaoPass --win-shortcut --win-menu --icon "./logo.ico" --name "MaoPass" --win-dir-chooser  --win-shortcut-prompt --copyright  "You Can use this application for free" --description "MaoPass allow you to check your passwords strength"  --vendor "maosmani" --about-url "www.maosmani.xyz"
+    
+    - name: Staging
+      run: |
+        mkdir staging
+        Copy-Item -Path target/*.msi -Destination staging
+    
+    - name: packaging
+      uses: actions/upload-artifact@v4
+      with:
+        name: Package
+        path: ./staging/
+
+  release-project:
+    name: Release Project
+    runs-on: windows-latest
+    needs: build
+    steps:
+    - name: Download Artifact 
+    - uses: actions/download-artifact@v4
+      with:
+        name: MaoPass
+    - name: Display structure of downloaded files
+      run: ls -R
