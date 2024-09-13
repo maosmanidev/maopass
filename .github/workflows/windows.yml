@@ -68,7 +68,7 @@ jobs:
     - name: packaging
       uses: actions/upload-artifact@v4
       with:
-        name: MaoPass-1
+        name: MaoPass
         path: ./staging/
 
   release:
@@ -79,4 +79,30 @@ jobs:
       - name: Download Artifact 
         uses: actions/download-artifact@v4
         with:
-           name: MaoPass-1
+           name: MaoPass
+      - name: View content
+        run: echo "This is the stagging folder..."
+        run: pwd
+        run: ls -R
+      - name: Create GitHub release
+        id: create-new-release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.run_number }}
+          release_name: Release ${{ github.run_number }}
+      - name: Archive site content
+        uses: thedoctor0/zip-release@master
+        with:
+          filename: MaoPass.zip
+      - name: Upload release asset
+        uses: actions/upload-release-asset@v4
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create-new-release.outputs.upload_url }}
+          asset_path: ./MaoPass.zip
+          asset_name: MaoPass-v${{ github.run_number }}.zip
+          asset_content_type: application/zip
+ 
