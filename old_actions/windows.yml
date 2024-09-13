@@ -1,4 +1,4 @@
-name: Build The Application For Windows
+name: Build The Application
 
 on:
   push:
@@ -6,7 +6,6 @@ on:
 
 jobs:
   build:
-    name: Build The Project
 
     runs-on: windows-latest
 
@@ -46,37 +45,31 @@ jobs:
     
     - name: Clean with Maven
       run: mvn clean
-  
+    
+    - name: Install dependencies and run tests
+      run: mvn clean test -Djavafx.platform=win -Dtestfx.robot=glass
     
     - name: Build with Maven
       run: mvn install
     
     - name: Copy logo
-      run: Copy-Item -Path ./logo.ico -Destination target/
+      run: Copy-Item -Path logo.png -Destination target/
     
-  
+    - name: Copy libs
+      run: Copy-Item -Path lib/* -Destination target/ -Recurse
+    
     - name: Packaging for MSIs
       run: |
         cd target/
-        jpackage --type msi --input . --dest . --main-jar ./MaoPass-1.0.jar --main-class Main --module-path "../javafx-jmods/javafx-jmods-21.0.4/"      --add-modules javafx.controls,javafx.fxml --name MaoPass --win-shortcut --win-menu --icon "./logo.ico" --name "MaoPass" --win-dir-chooser  --win-shortcut-prompt --copyright  "You Can use this application for free" --description "MaoPass allow you to check your passwords strength"  --vendor "maosmani" --about-url "www.maosmani.xyz"
+        jpackage --type msi --input . --dest . --main-jar ./MaoPass-1.0.jar --main-class Main --module-path "../javafx-jmods/javafx-jmods-21.0.4/" --add-modules javafx.controls,javafx.fxml --name MaoPass --win-shortcut --win-menu --icon ./logo.png --name "MaoPass"
     
     - name: Staging
       run: |
         mkdir staging
         Copy-Item -Path target/*.msi -Destination staging
     
-    - name: packaging
+    - name: Packaging
       uses: actions/upload-artifact@v4
       with:
-        name: MaoPass-1
-        path: ./staging/
-
-  release:
-    name: Release Project
-    runs-on: windows-latest
-    needs: build
-    steps:
-      - name: Download Artifact 
-        uses: actions/download-artifact@v4
-        with:
-           name: MaoPass-1
+        name: Package
+        path: staging
