@@ -71,7 +71,7 @@ jobs:
         name: Package
         path: ./staging/
 
-  release-project:
+  release:
     name: Release Project
     runs-on: windows-latest
     needs: build
