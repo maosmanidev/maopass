@@ -79,6 +79,4 @@ jobs:
       - name: Download Artifact 
         uses: actions/download-artifact@v4
         with:
-           name: packaging
-      - name: Display structure of downloaded files
-        run: ls -R
+           name: Package
