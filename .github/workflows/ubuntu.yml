@@ -73,8 +73,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: cd to staging
-        run: cd ./staging/
       - name: See Files
         run: ls -a
 
