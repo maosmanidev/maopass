@@ -55,12 +55,13 @@ jobs:
     - name: Upload Linux DEBs to Release
       id: upload-linux
       if: startsWith(github.ref, 'refs/tags/')
-      uses: actions/upload-release-asset@v1
+      uses: softprops/action-gh-release@v2
+      env:
+        GITHUB_TOKEN: ${{ secrets.ACTIONS_TESTS_SECRET  }}
       with:
-        upload_url: ${{ github.event.release.upload_url }}
-        asset_path: ./target/*.deb
-        asset_name: MaoPass.deb
-        asset_content_type: application/vnd.debian.binary-package
+        name: Release ${{ github.ref_name }}
+        files: |
+          *.deb
 
   build-windows:
     runs-on: windows-latest
@@ -107,12 +108,13 @@ jobs:
         cp target/*.msi ./ 
     - name: Upload Windows MSI to Release
       if: startsWith(github.ref, 'refs/tags/')
-      uses: actions/upload-release-asset@v1
+      uses: softprops/action-gh-release@v2
+      env:
+        GITHUB_TOKEN: ${{ secrets.ACTIONS_TESTS_SECRET  }}
       with:
-        upload_url: ${{ github.event.release.upload_url }}
-        asset_path: ./target/*.msi
-        asset_name: MaoPass.msi  
-        asset_content_type: application/vnd.ms-windows
+        name: Release ${{ github.ref_name }}
+        files: |
+          *.msi
 
   create-release:
     needs: [build-linux, build-windows]
@@ -120,9 +122,13 @@ jobs:
     steps:
     - name: Create Release
       if: startsWith(github.ref, 'refs/tags/')
-      uses: github-release-action@v1
+      uses: softprops/action-gh-release@v2
+      env:
+        GITHUB_TOKEN: ${{ secrets.ACTIONS_TESTS_SECRET  }}
       with:
+        name: Release ${{ github.ref_name }}
         files: |
-          *.deb
-          *.msi
-        token: ${{ secrets.ACTIONS_TESTS_SECRET }}
+            **/*.deb
+            **/*.msi
+           
+        
