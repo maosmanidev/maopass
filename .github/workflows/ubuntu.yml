@@ -12,7 +12,7 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
     steps:
     - uses: actions/checkout@v4
     - name: Set up JDK 21
@@ -64,15 +64,12 @@ jobs:
     # Make Release Here
     -name: copy to Release
       run: mkdir Release && cp target/*.deb staging
+      run: cd  ./Release/
+      run: ls 
 
-    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
+    #if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
   
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: cd to Release
-        run: cd ./Release/
-      - name: See Files
-        run: ls -a
+ 
 
 
 
