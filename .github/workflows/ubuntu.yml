@@ -60,20 +60,20 @@ jobs:
 
     - name: stagin
       run: mkdir staging && cp target/*.deb staging && cd ./staging/ && ls
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: See Files
-        run: ls -a
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: See Files
+      run: ls -a
 
-      - name: Create Release
-        if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v2
-        env:
+    - name: Create Release
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: softprops/action-gh-release@v2
+      env:
           GITHUB_TOKEN: ${{ secrets.ACTIONS_TESTS_SECRET }}
-        with:
+      with:
           name: Release ${{ github.ref_name }}
           files: |
             maopass_1.0_amd64.deb
-      - name: See Files
-        run: ls -a
+    - name: See Files
+      run: ls -a
 
