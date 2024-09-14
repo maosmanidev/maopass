@@ -61,7 +61,7 @@ jobs:
       run: mkdir staging && cp target/*.deb staging
     # Make Release Here
     -name: copy to Release
-      run: mkdir Release && cp target/*.deb staging
+      run: mkdir Release && cp target/*.deb Release
       run: cd  ./Release/
       run: ls 
 
