@@ -63,7 +63,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
     - name: See Files
-      run: ls -a
+      run:  cd ./staging/ && ls
 
     - name: Create Release
       if: startsWith(github.ref, 'refs/tags/')
