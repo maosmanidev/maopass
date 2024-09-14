@@ -58,9 +58,8 @@ jobs:
     - name: packaging for debs
       run: cd target/ && jpackage --type deb --input . --dest . --main-jar ./MaoPass-1.0.jar --main-class Main --module-path "../javafx-jmods/javafx-jmods-21.0.4/" --add-modules javafx.controls,javafx.fxml --name MaoPass  --linux-shortcut --install-dir /opt --linux-menu-group Utility  --icon ./logo.png --name "MaoPass"
     - name: stagin
-      run: mkdir staging && cp target/*.deb staging
-      run: cd ./staging/
-      run: ls 
+      run: mkdir staging && cp target/*.deb staging && cd ./staging/ && ls
+
     # Make Release Here
   
 
