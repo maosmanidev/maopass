@@ -96,7 +96,7 @@ jobs:
     - name: Build with Maven
       run: mvn install
     - name: copy logo
-      run: cp logo.png target/
+      run: cp logo.ico target/
     - name: copy libs
       run: cp -r lib/  target/
     - name: Packaging for Windows
