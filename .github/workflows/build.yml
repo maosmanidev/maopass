@@ -120,11 +120,9 @@ jobs:
     steps:
     - name: Create Release
       if: startsWith(github.ref, 'refs/tags/')
-      uses: softprops/action-gh-release@v2
-      env:
-        GITHUB_TOKEN: ${{ secrets.ACTIONS_TESTS_SECRET  }}
+      uses: github-release-action@v1
       with:
-        name: Release ${{ github.ref_name }}
         files: |
-            *.deb
-            *.msi
+          *.deb
+          *.msi
+        token: ${{ secrets.ACTIONS_TESTS_SECRET }}
