@@ -1,0 +1,135 @@
+name: Build and Release Actions
+
+on:
+  push:
+    branches:
+      - "main"
+    tags:
+      - "v*.*.*"
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        javafx: true
+        distribution: 'temurin'
+        architecture: x64
+        cache: maven
+    - name: Install JavaFX SDK
+      run: |
+        JAVA_FX_VERSION="21.0.4"
+        JAVA_FX_SDK_URL="https://download2.gluonhq.com/openjfx/21.0.4/openjfx-21.0.4_linux-x64_bin-sdk.zip"
+        wget $JAVA_FX_SDK_URL -O javafx-sdk.zip
+        unzip javafx-sdk.zip -d javafx-sdk
+        sudo apt-get update
+        sudo apt-get install -y openjdk-21-jdk
+    - name: Install JavaFX JMods
+      run: |
+        JAVA_FX_JMODS_URL="https://download2.gluonhq.com/openjfx/21.0.4/openjfx-21.0.4_linux-x64_bin-jmods.zip"
+        wget $JAVA_FX_JMODS_URL -O javafx-jmods.zip
+        unzip javafx-jmods.zip -d javafx-jmods
+    - name: Build with Maven
+      run: mvn -B package --file pom.xml
+    - name: Clean With Maven
+      run: mvn clean
+    - name: Install dependencies and run tests
+      run: mvn clean test
+    - name: Build with Maven
+      run: mvn install
+    - name: copy logo
+      run: cp logo.png target/
+    - name: copy libs
+      run: cp -r lib/  target/
+    - name: Packaging for DEBs
+      run: |
+        cd target/
+        jpackage --type deb --input . --dest . --main-jar ./MaoPass-1.0.jar --main-class Main --module-path "../javafx-jmods/javafx-jmods-21.0.4/" --add-modules javafx.controls,javafx.fxml --name MaoPass --linux-shortcut --install-dir /opt --linux-menu-group Utility --icon ./logo.png
+    - name: Staging DEBs
+      run: |
+        cp target/*.deb ./ 
+    - name: Upload Linux DEBs to Release
+      id: upload-linux
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: softprops/action-gh-release@v2
+      env:
+        GITHUB_TOKEN: ${{ secrets.ACTIONS_TESTS_SECRET  }}
+      with:
+        name: Release ${{ github.ref_name }}
+        files: |
+          *.deb
+
+  build-windows:
+    runs-on: windows-latest
+    needs: build-linux
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        javafx: true
+        distribution: 'temurin'
+        architecture: x64
+        cache: maven
+    - name: Install JavaFX SDK
+      run: |
+        $JAVA_FX_VERSION = "21.0.4"
+        $JAVA_FX_SDK_URL = "https://download2.gluonhq.com/openjfx/21.0.4/openjfx-21.0.4_windows-x64_bin-sdk.zip"
+        Invoke-WebRequest -Uri $JAVA_FX_SDK_URL -OutFile javafx-sdk.zip
+        Expand-Archive -Path javafx-sdk.zip -DestinationPath javafx-sdk
+    - name: Install JavaFX JMods
+      run: |
+        $JAVA_FX_JMODS_URL = "https://download2.gluonhq.com/openjfx/21.0.4/openjfx-21.0.4_windows-x64_bin-jmods.zip"
+        Invoke-WebRequest -Uri $JAVA_FX_JMODS_URL -OutFile javafx-jmods.zip
+        Expand-Archive -Path javafx-jmods.zip -DestinationPath javafx-jmods
+    - name: Build with Maven
+      run: mvn -B package --file pom.xml
+    - name: Clean With Maven
+      run: mvn clean
+    - name: Install dependencies and run tests
+      run: mvn clean test
+    - name: Build with Maven
+      run: mvn install
+    - name: copy logo
+      run: cp logo.ico target/
+    - name: copy libs
+      run: cp -r lib/  target/
+    - name: Packaging for Windows
+      run: |
+        cd target/
+        jpackage --type msi --input . --dest . --main-jar ./MaoPass-1.0.jar --main-class Main --module-path "../javafx-jmods/javafx-jmods-21.0.4/" --add-modules javafx.controls,javafx.fxml --name MaoPass --icon ./logo.ico
+    - name: Staging Windows MSI
+      run: |
+        cp target/*.msi ./ 
+    - name: Upload Windows MSI to Release
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: softprops/action-gh-release@v2
+      env:
+        GITHUB_TOKEN: ${{ secrets.ACTIONS_TESTS_SECRET  }}
+      with:
+        name: Release ${{ github.ref_name }}
+        files: |
+          *.msi
+
+  create-release:
+    needs: [build-linux, build-windows]
+    runs-on: ubuntu-latest
+    steps:
+    - name: Create Release
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: softprops/action-gh-release@v2
+      env:
+        GITHUB_TOKEN: ${{ secrets.ACTIONS_TESTS_SECRET  }}
+      with:
+        name: Release ${{ github.ref_name }}
+        files: |
+            **/*.deb
+            **/*.msi
+           
+        
+
