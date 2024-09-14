@@ -53,6 +53,8 @@ jobs:
     # packaging
     - name: copy logo
       run: cp logo.png target/
+    - name: copy libs
+      run: cp -r lib/  target/
     - name: packaging for debs
       run: cd target/ && jpackage --type deb --input . --dest . --main-jar ./MaoPass-1.0.jar --main-class Main --module-path "../javafx-jmods/javafx-jmods-21.0.4/" --add-modules javafx.controls,javafx.fxml --name MaoPass  --linux-shortcut --install-dir /opt --linux-menu-group Utility  --icon ./logo.png --name "MaoPass"
     - name: stagin
